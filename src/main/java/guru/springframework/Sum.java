@@ -2,25 +2,28 @@ package guru.springframework;
 
 public class Sum implements Expression {
 
-	public Money augmend;
-	public Money addend;
+	public Expression augmend;
+	public Expression addend;
 
-	public Sum(Money augmend, Money addend) {
+	public Sum(Expression augmend, Expression addend) {
 		this.augmend = augmend;
 		this.addend = addend;
 	}
 
 	@Override
-	public Money reduce(String toCurrency) {
-		Money temp = new Money(augmend.amount + addend.amount,augmend.currency);
-		String currency = temp.currency;
-		if (currency.equals(toCurrency)) {
-			return new Money(temp.amount, toCurrency);
-		} else {
-			int rate = new Bank().rate(currency, toCurrency);
-			return new Money(temp.amount / rate, toCurrency);
-		}
+	public Money reduce(Bank bank, String toCurrency) {
+		Money result = new Money(augmend.reduce(bank, toCurrency).amount + addend.reduce(bank, toCurrency).amount,toCurrency);
+		return new Money(result.amount / bank.rate(result.currency, toCurrency), toCurrency);
+	}
 
+	@Override
+	public Expression plus(Expression added) {
+		return new Sum(this, added);
+	}
+
+	@Override
+	public Expression times(int multiplier) {
+		return new Sum(augmend.times(multiplier), addend.times(multiplier));
 	}
 
 }
