@@ -32,7 +32,18 @@ public class Money implements Expression {
 	}
 
 	public Expression plus(Money added) {
-		return new Money(amount + added.amount, currency);
+		return new Sum(this,added);
+	}
+
+	@Override
+	public Money reduce(String toCurrency) {
+		Money result = this;
+		if(result.currency.equals(toCurrency)) {
+			return result;
+		} else {
+			int rate = new Bank().rate(result.currency, toCurrency);
+			return new Money(result.amount/rate, toCurrency);
+		}
 	}
 
 }
